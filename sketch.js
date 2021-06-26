@@ -41,13 +41,12 @@ function setup() {
     // create restart button
     restart = createSprite(500, 300)
     restart.addImage(restartimg)
-
 }
 
 function draw() {
     if (gamestate === 'play') {
         restart.visible = false
-        mario.setCollider('rectangle', 0, 0, 200, 500)
+        mario.setCollider('rectangle', 0, 0, 200,500)
         mario.scale=0.15
 
         // scroll background
@@ -72,9 +71,10 @@ function draw() {
         // }
 
         // jump with space
-        if (((keyDown('space') || mouseIsPressed)) && mario.isTouching(ground)) {
+        if (((keyDown('space') || mouseIsPressed)) && (mario.y>530 || mario.isTouching(brickgrp))) {
             mario.velocityY = -12
         }
+        console.log(mario.y)
         // gravity
         mario.velocityY = mario.velocityY + 0.5
 
@@ -133,7 +133,7 @@ function draw() {
         obstaclegrp.setVelocityXEach(0)
         obstaclegrp.setLifetimeEach(-1)
         mario.changeAnimation('collided', mario_collided)
-        mario.scale = 0.4
+        mario.scale = 0.15
         mario.setCollider('rectangle', 0, 0, 300, 10)
         mario.y = 570
         restart.visible = true
