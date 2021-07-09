@@ -22,9 +22,10 @@ function setup() {
     bg = createSprite(800, 300)
     bg.addImage(bgimg)
     bg.scale = 0.5
+    bg.velocityX=-6
 
     // create mario sprite
-    mario = createSprite(200, 485, 20, 50)
+    mario = createSprite(200, 500, 20, 50)
     mario.addAnimation('running', mario_running)
     mario.addAnimation('collided',mario_collided)
     mario.scale = 0.15
@@ -46,11 +47,11 @@ function setup() {
 function draw() {
     if (gamestate === 'play') {
         restart.visible = false
-        mario.setCollider('rectangle', 0, 0, 200,500)
+        mario.setCollider('rectangle', 0, 0, 200,490)
         mario.scale=0.15
 
         // scroll background
-        bg.velocityX = -6
+        bg.velocityX=-6
         if (bg.x < 220) {
             bg.x = 800
         }
@@ -60,27 +61,22 @@ function draw() {
             mario.x = 200
         }
 
-        // prevent mario from moving out from the top
-        // if (mario.y < 395) {
-        //     mario.y = 395
-        // }
-        // if (mario.isTouching(brickgrp)){
-        //     if (mario.y < 250) {
-        //         mario.y = 250
-        //     }
-        // }
-
         // jump with space
         if (((keyDown('space') || mouseIsPressed)) && (mario.y>530 || mario.isTouching(brickgrp))) {
             mario.velocityY = -12
         }
-        console.log(mario.y)
         // gravity
         mario.velocityY = mario.velocityY + 0.5
 
         // call the function to generate bricks
-        generatebricks()
-
+        if (frameCount % 120 == 0) {
+            brick = createSprite(1000, random(450, 480), 40, 10)
+            brick.addImage(brickimg)
+            brick.scale = 0.35
+            brick.velocityX = -6
+            brick.lifetime = 1000
+            brickgrp.add(brick)
+        }
         // make mario collide with bricks
         for (var i = 0; i < (brickgrp).length; i++) {
             var temp = brickgrp.get(i)
@@ -91,7 +87,14 @@ function draw() {
         }
 
         // call the function to generate coins
-        generatecoins()
+        if (frameCount % 140 == 0) {
+            coin = createSprite(1000, random(460, 530), 40, 10)
+            coin.addAnimation('coin', coinimg)
+            coin.scale = 0.07
+            coin.velocityX = -6
+            coin.lifetime = 1000
+            coingrp.add(coin)
+        }
 
         // make mario catch the coins
         for (var i = 0; i < coingrp.length; i++) {
@@ -112,8 +115,25 @@ function draw() {
         }
 
         // call the function to generate obstacles
-        generateobstacles()
-
+        if (frameCount % Math.round(random(75,100)) == 0) {
+            obstacle = createSprite(1000, 555, 10, 40)
+            obstacle.velocityX = -7
+            var rand = Math.round(random(1, 2))
+            switch (rand) {
+                case 1:
+                    obstacle.addAnimation('mushroom', mushroom)
+                    break
+                case 2:
+                    obstacle.addAnimation('turtle', turtle)
+    
+                    break
+                default:
+                    break
+            }
+            obstacle.scale = 0.1
+            obstacle.lifetime = 150
+            obstaclegrp.add(obstacle)
+        }
         // prevent mario from falling down due to gravity
         mario.collide(ground)
         
@@ -137,10 +157,11 @@ function draw() {
         mario.setCollider('rectangle', 0, 0, 300, 10)
         mario.y = 570
         restart.visible = true
+        if (mousePressedOver(restart)) {
+            restartGame()
+        }
     }
-    if (mousePressedOver(restart)) {
-        restartGame()
-    }
+    
     // draw sprites on screen
     drawSprites()
     textSize(20)
@@ -150,93 +171,6 @@ function draw() {
     text('Coins Collected: ' + coinscore, 800, 50)
 }
 
-function generatebricks() {
-    var framecount
-    var rando = Math.round(random(1, 3));
-    switch (rando) {
-        case 1:
-            framecount = 90
-            break
-        case 2:
-            framecount = 150
-            break
-        case 3:
-            framecount = 190
-            break
-        default:
-            break
-    }
-    if (frameCount % framecount == 0) {
-        var brick = createSprite(1000, random(450, 480), 40, 10)
-        brick.addImage(brickimg)
-        brick.scale = 0.35
-        brick.velocityX = -3
-        brick.lifetime = 1000
-        brickgrp.add(brick)
-    }
-}
-function generatecoins() {
-    var framecount
-    var rando = Math.round(random(1, 3))
-    switch (rando) {
-        case 1:
-            framecount = 90
-            break
-        case 2:
-            framecount = 150
-            break
-        case 3:
-            framecount = 190
-            break
-        default:
-            break
-    }
-    if (frameCount % framecount == 0) {
-        var coin = createSprite(1000, random(460, 530), 40, 10)
-        coin.addAnimation('coin', coinimg)
-        coin.scale = 0.07
-        coin.velocityX = -3
-        coin.lifetime = 1000
-        coingrp.add(coin)
-    }
-}
-
-function generateobstacles() {
-    var framecount
-    var rando = Math.round(random(1, 3))
-    switch (rando) {
-        case 1:
-            framecount = 90
-            break
-        case 2:
-            framecount = 150
-            break
-        case 3:
-            framecount = 190
-            break
-        default:
-            break
-    }
-    if (frameCount % framecount == 0) {
-        var obstacle = createSprite(1000, 555, 10, 40)
-        obstacle.velocityX = -5
-        var rand = Math.round(random(1, 2))
-        switch (rand) {
-            case 1:
-                obstacle.addAnimation('mushroom', mushroom)
-                break
-            case 2:
-                obstacle.addAnimation('turtle', turtle)
-
-                break
-            default:
-                break
-        }
-        obstacle.scale = 0.1
-        obstacle.lifetime = 200
-        obstaclegrp.add(obstacle)
-    }
-}
 function restartGame() {
     gamestate = 'play'
     obstaclegrp.destroyEach()
@@ -244,5 +178,4 @@ function restartGame() {
     coingrp.destroyEach()
     mario.changeAnimation('running', mario_running)
     coinscore = 0
-    restart.visible = false
 }
